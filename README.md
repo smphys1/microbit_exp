@@ -7,15 +7,17 @@
 
 사이트 접속 가능 범위는 Sites의 공유 설정에 따릅니다. 이 저장소에는 학생 제출물, 채점 데이터, 교사용 접속 코드가 포함되어 있지 않습니다.
 
+학생은 첫 화면에 **학번과 이름만 입력**하면 이용할 수 있습니다. Google·ChatGPT 계정이나 학생 비밀번호는 필요하지 않습니다. 같은 학번과 이름으로 다시 접속하면 이전 제출을 불러올 수 있습니다. **본인 확인은 하지 않으므로 같은 정보를 입력한 사람은 제출물을 조회·재제출하고 공개된 평가를 볼 수 있습니다.** 공개 서버 배포 방법은 [학번·이름 접속과 배포](docs/student-access.md)를 참고하세요. 기존 Sites 배포는 코드 변경만으로 갱신되지 않습니다.
+
 ## GitHub Pages에서 ver2 열기
 
 GitHub 저장소의 **Code 화면**에는 README가 표시됩니다. 웹앱 진입 화면은 별도의 **GitHub Pages 주소**에서 열립니다.
 
-루트의 `index.html`은 배포된 ver2 웹앱으로 자동 이동하는 진입점입니다. 자동 이동이 차단되면 화면의 **웹앱 열기** 링크를 누르세요. 로그인과 제출·채점은 기존 ver2 서버에서 처리합니다.
+`github-pages/index.html`은 배포된 ver2 웹앱으로 자동 이동하는 진입점입니다. 자동 이동이 차단되면 화면의 **웹앱 열기** 링크를 누르세요. 현재 이동 대상은 기존 Sites 주소이므로, 계정 없이 배포하려면 공개 서버를 배포하고 해당 주소로 이동 대상을 변경해야 합니다. 학생 접속과 제출·채점은 앱 서버에서 처리합니다.
 
 ```text
-index.html                    GitHub Pages 진입점 → 배포된 ver2로 이동
-.github/workflows/pages.yml    index.html만 Pages에 배포
+github-pages/index.html       GitHub Pages 진입점 → 배포된 ver2로 이동
+.github/workflows/pages.yml    github-pages/index.html을 Pages 루트에 배포
 app/                          React 화면 및 서버 API
 worker/                       Cloudflare Workers 진입점
 db/, drizzle/                 D1 스키마와 마이그레이션
@@ -25,12 +27,12 @@ db/, drizzle/                 D1 스키마와 마이그레이션
 
 1. 변경 파일을 GitHub의 `main` 브랜치에 커밋하고 푸시합니다.
 2. 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 선택합니다.
-3. **Actions → Deploy ver2 entry to GitHub Pages → Run workflow**를 실행합니다. 이후 `index.html` 또는 배포 워크플로 변경을 `main`에 푸시하면 자동 배포됩니다.
+3. **Actions → Deploy ver2 entry to GitHub Pages → Run workflow**를 실행합니다. 이후 `github-pages/index.html` 또는 배포 워크플로 변경을 `main`에 푸시하면 자동 배포됩니다.
 4. 배포가 성공하면 `https://smphys1.github.io/microbit_exp/`를 엽니다. 이 주소에서 ver2 웹앱으로 이동합니다.
 
-Pages 배포물에는 `index.html`과 `.nojekyll`만 포함됩니다. README, 앱 소스, 로컬 환경 변수, 데이터베이스와 업로드 파일은 포함하지 않습니다. 이 Pages 배포에는 Node.js 의존성 설치나 Cloudflare 인증이 필요하지 않습니다.
+Pages 배포물에는 루트의 `index.html`과 `.nojekyll`만 포함됩니다. README, 앱 소스, 로컬 환경 변수, 데이터베이스와 업로드 파일은 포함하지 않습니다. 이 Pages 배포에는 Node.js 의존성 설치나 Cloudflare 인증이 필요하지 않습니다.
 
-`index.html`은 ver2 앱을 정적 HTML로 변환한 파일이 아닙니다. 앱 화면 자체를 GitHub Pages에서 실행하려면 별도 프런트엔드 빌드와 서버 인증·API 연결 설계가 필요합니다. ver2 주소가 변경되면 `index.html`의 자동 이동 주소와 링크를 함께 수정하세요.
+`github-pages/index.html`은 ver2 앱을 정적 HTML로 변환한 파일이 아닙니다. 앱 화면 자체를 GitHub Pages에서 실행하려면 별도 프런트엔드 빌드와 서버 인증·API 연결 설계가 필요합니다. ver2 주소가 변경되면 `github-pages/index.html`의 자동 이동 주소와 링크를 함께 수정하세요.
 
 ## 학생 활동
 
@@ -60,7 +62,7 @@ Pages 배포물에는 `index.html`과 `.nojekyll`만 포함됩니다. README, �
 - D1 `DB`: 제출 내용, 파일 메타데이터, 채점 결과
 - R2 `BUCKET`: CSV, XLSX, 그래프 이미지
 - jsPDF / html2canvas: 한글 보고서 PDF 생성
-- Sites 인증: 학생 제출을 사용자 ID별로 구분
+- 학번·이름 입력과 서명된 접속 세션: 학생별 제출 구분
 
 **서버와 저장소가 필요한 웹앱입니다. GitHub Pages 같은 정적 호스팅만으로는 제출·채점 API를 실행할 수 없습니다.** GitHub 커밋과 웹사이트 배포는 별도 작업입니다.
 
@@ -73,7 +75,7 @@ pnpm install --frozen-lockfile
 cp .dev.vars.example .dev.vars
 ```
 
-`.dev.vars`의 `TEACHER_KEY`를 로컬 개발용 값으로 채웁니다. 실제 배포에서는 Sites의 런타임 비밀 변수로 별도 설정합니다. 운영 접속 코드를 소스나 Git에 기록하지 않습니다.
+`.dev.vars`의 `TEACHER_KEY`, `APP_URL`, `AUTH_SESSION_SECRET`을 로컬 개발용 값으로 채웁니다. 세션 서명 키는 32바이트 이상의 무작위 서버 전용 값이며 학생에게 입력받지 않습니다. Google OAuth 등록이나 학교 관리자 승인은 필요하지 않습니다. 실제 배포에서는 Cloudflare Workers 설정에 별도 등록합니다. 운영 비밀 값을 소스나 Git에 기록하지 않습니다.
 
 ```sh
 pnpm build
@@ -96,8 +98,10 @@ Sites 관리 환경에서는 해당 환경의 미리보기·배포 도구를 사
 | `TEACHER_KEY` | 교사용 평가 API 접속 코드. 서버 비밀 변수이며 클라이언트 번들에 포함하지 않음 |
 | `DB` | D1 바인딩 |
 | `BUCKET` | R2 바인딩 |
+| `APP_URL` | 공개 앱의 HTTPS origin. 로컬 개발에서는 `http://127.0.0.1:5173` |
+| `AUTH_SESSION_SECRET` | 32바이트 이상의 무작위 서버 세션 서명 키 |
 
-학생 제출 API는 Sites가 전달하는 `oai-authenticated-user-id`를 사용합니다. 일반 호스팅으로 이전한다면 해당 인증 경계도 구현해야 하며, 인터넷 클라이언트가 보낸 동일 이름의 헤더를 그대로 신뢰해서는 안 됩니다. 관리 환경의 로컬 미리보기에는 실제 Sites 로그인 상태가 없을 수 있습니다.
+학생 제출 API는 학번·이름 입력 후 발급한 세션 쿠키로 현재 학생을 구분하며 `oai-authenticated-user-id` 헤더는 사용하지 않습니다. 제출물의 학번·이름은 서버가 접속 정보로 채워 폼의 다른 값으로 바꿀 수 없게 합니다. 세션 서명은 쿠키 변조를 막을 뿐 입력자의 실제 신원을 확인하지 않습니다. 교사 기능은 별도 접속 코드로 보호됩니다. 이전 Google/Sites 제출 소유자는 새 학번·이름과 자동 연결되지 않습니다.
 
 초안은 브라우저에 자동 저장되며 JSON으로 백업할 수 있습니다. 파일 선택만으로 서버 제출이 되지 않습니다. 제출 완료 표시와 접수번호를 확인해야 합니다. PDF 다운로드도 서버 제출과 별개입니다.
 
@@ -105,11 +109,13 @@ Sites 관리 환경에서는 해당 환경의 미리보기·배포 도구를 사
 
 ```sh
 pnpm exec tsc --noEmit
-node tests/submission.test.mjs
+pnpm test
 pnpm build
 ```
 
 테스트는 메모리 SQLite와 테스트용 파일 저장소로 제출·첨부 파일 보존, 사용자별 접근 분리, 교사 인증, 점수 합산·검증·공개, 재제출 초기화, 제출 차수 충돌과 Origin 검사를 확인합니다. 테스트에 사용하는 식별자와 접속 코드는 기능 검증용이며 운영 데이터가 아닙니다.
+
+접속 테스트는 학번·이름 입력, 공백·문자 정규화, 같은 정보로 재접속, 잘못된 입력·다른 출처 요청 차단, 세션 변조·만료·헤더 위조 거부와 나가기를 확인합니다. 브라우저 초안도 학번·이름 조합별로 분리해 저장합니다.
 
 ## 주요 파일
 

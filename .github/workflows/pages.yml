@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - index.html
+      - github-pages/**
       - .github/workflows/pages.yml
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
       - name: Prepare static entry
         run: |
           mkdir -p "$RUNNER_TEMP/pages"
-          cp index.html "$RUNNER_TEMP/pages/index.html"
+          cp github-pages/index.html "$RUNNER_TEMP/pages/index.html"
           touch "$RUNNER_TEMP/pages/.nojekyll"
       - uses: actions/upload-pages-artifact@v3
         with:
