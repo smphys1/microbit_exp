@@ -1,5 +1,7 @@
 # microbit_exp
 
+**ver3가 추가되었습니다.** [학생 화면](https://smphys1.github.io/microbit_exp/ver3/) · [교사 채점](https://smphys1.github.io/microbit_exp/ver3/teacher/) · [사용 안내](docs/ver3.md). 학생 제출 파일을 가져와 50점 채점·피드백 저장·CSV/백업 내보내기를 지원합니다. ver1·ver2는 기존 주소와 동작을 유지합니다. 아래 내용은 별도 표시가 없으면 ver2 설명입니다.
+
 고등학교 **과학탐구실험 개인 자유주제탐구**를 위한 **탐구노트 ver2** 소스입니다. 마이크로비트 측정부터 파일 제출, 보고서 PDF, 교사의 50점 평가까지 지원합니다.
 
 - [ver2 웹앱 · GitHub Pages](https://smphys1.github.io/microbit_exp/)
@@ -34,8 +36,8 @@ Pages에서는 PDF·원본 CSV·XLSX를 교사가 안내한 제출 경로로 전
 배포 방법:
 
 1. 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정합니다.
-2. `main`에 푸시하면 **Deploy ver2 app to GitHub Pages**가 의존성 설치·타입 검사·테스트·정적 빌드를 실행하고 배포합니다.
-3. 수동 실행은 **Actions → Deploy ver2 app to GitHub Pages → Run workflow → main**에서 할 수 있습니다.
+2. `main`에 푸시하면 **Deploy inquiry apps to GitHub Pages**가 의존성 설치·타입 검사·테스트·정적 빌드를 실행하고 배포합니다.
+3. 수동 실행은 **Actions → Deploy inquiry apps to GitHub Pages → Run workflow → main**에서 할 수 있습니다.
 4. 배포 성공 후 위 Pages 주소를 엽니다. 기존 이동 화면이 보이면 새로고침하거나 시크릿 창에서 확인하세요.
 
 개발 중에는 `pnpm dev`로 GitHub Pages와 같은 앱을 바로 엽니다. 외부 미리보기 연결을 위해 모든 인터페이스에서 5173번 포트를 사용하며 `terminal.local` 호스트를 허용합니다. 서버 세션이나 `.dev.vars`는 필요하지 않습니다.

@@ -1,4 +1,4 @@
-name: Deploy ver2 app to GitHub Pages
+name: Deploy inquiry apps to GitHub Pages
 
 on:
   push:
