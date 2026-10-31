@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+import {DatabaseSync} from 'node:sqlite';
+import {validateGrade,totals} from '../lib/rubric.ts';
+const sqlite=new DatabaseSync(':memory:');sqlite.exec(fs.readFileSync('drizzle/0000_mighty_mac_gargan.sql','utf8'));
+const objects=new Map();const env={TEACHER_KEY:'test-teacher-only',DB:{prepare(sql){return {bind(...params){return {async first(){return sqlite.prepare(sql).get(...params)||null},async all(){return {results:sqlite.prepare(sql).all(...params)}},async run(){const r=sqlite.prepare(sql).run(...params);return {meta:{changes:r.changes}}}}}}}},BUCKET:{async put(k,body){objects.set(k,new Uint8Array(await new Response(body).arrayBuffer()))},async get(k){return objects.has(k)?{body:objects.get(k)}:null},async delete(k){objects.delete(k)}}};
+let source=fs.readFileSync('app/api/[...path]/route.ts','utf8').replace(/import \{env\} from 'cloudflare:workers';/,'').replace(/import \{validateGrade,totals\} from '[^']+';/,'').replace(/export const /g,'const ');
+source=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;
+const run=new Function('env','validateGrade','totals',source+';return run;')(env,validateGrade,totals);
+const A={'oai-authenticated-user-id':'student-a'},B={'oai-authenticated-user-id':'student-b'},T={'x-teacher-key':'test-teacher-only'};
+const req=(path,headers={},opt={})=>run(new Request('https://unit.test/api/'+path,{headers,...opt}));
+assert.equal((await req('teacher/list')).status,403);assert.equal((await req('me')).status,401);assert.equal((await req('teacher/check',T)).status,200);
+const fields=Object.fromEntries(['student','classroom','situation','dataKind','question','topic','independent','controls','procedure','motivation','analysis','conclusion','limits'].map(k=>[k,'TEST '+k]));Object.assign(fields,{sensor:'light'});const payload={fields,checks:{control:true,repeat:true,unit:true}};
+const original=new TextEncoder().encode('sep=,\ntime_s,light\n0,40\n1,42');
+function form(files=false){const f=new FormData();f.append('payload',JSON.stringify(payload));if(files){f.append('csv',new File([original],'original.csv'));f.append('sheet',new File([new Uint8Array([0x50,0x4b,3,4])],'charts.xlsx'))}return f}
+assert.equal((await req('submit',A,{method:'POST',body:form()})).status,400);
+let r=await req('submit',A,{method:'POST',body:form(true)});assert.equal(r.status,200,await r.clone().text());const d=await r.json();
+assert.equal(objects.size,2);assert.equal((await req('file/'+d.files[0].key,B)).status,403);assert.equal(await(await req('file/'+d.files[0].key,A)).text(),new TextDecoder().decode(original));assert.equal((await req('file/'+d.files[1].key,T)).status,200);
+let g={topic:[2,2,2,2,2],files:Array(10).fill(1),report:[4,6,8,8,4],feedback:'TEST feedback',released:false,revision:1};const put=g=>req('teacher/submission/'+d.id,T,{method:'PUT',body:JSON.stringify(g)});
+assert.equal((await put(g)).status,200);assert.equal((await(await req('me',A)).json()).grade,null);g.released=true;assert.equal((await put(g)).status,200);const graded=JSON.parse((await(await req('me',A)).json()).grade);assert.equal(Object.values(graded.totals).reduce((a,b)=>a+b,0),50);
+assert.equal((await put({...g,report:[99,6,8,8,4]})).status,400);assert.equal((await req('teacher/submission/'+d.id,B)).status,403);
+assert.equal((await req('submit',A,{method:'POST',body:form()})).status,200);assert.equal((await put(g)).status,409);assert.equal((await(await req('me',A)).json()).grade,null);
+assert.equal((await req('submit',{...A,origin:'https://evil.test'},{method:'POST',body:form()})).status,403);
+console.log('PASS: submission + attachments, byte-preserving download, identity isolation, teacher authorization, 50-point total, grade validation/release, resubmission reset, stale-grade protection, origin check');
