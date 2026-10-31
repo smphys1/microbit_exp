@@ -1,8 +1,11 @@
 import {jwtVerify,SignJWT} from 'jose';
+import {studentFromDetails} from './student-identity.ts';
+import type {StudentUser} from './student-identity.ts';
+export {studentFromDetails};
+export type {StudentUser};
 
 const SESSION_SECONDS=8*60*60;
 export interface AuthEnv {APP_URL?:string; AUTH_SESSION_SECRET?:string}
-export interface StudentUser {id:string;studentNumber:string;name:string}
 
 function appOrigin(env:AuthEnv):string{
   const url=new URL(env.APP_URL||'');
@@ -19,17 +22,6 @@ function cookie(env:AuthEnv,value:string,seconds:number):string{
   return `${cookieName(env)}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}`+(appOrigin(env).startsWith('https:')?'; Secure':'');
 }
 
-// These are self-reported details, not proof of a student's identity.
-export async function studentFromDetails(number:unknown,name:unknown):Promise<StudentUser>{
-  if(typeof number!=='string'||typeof name!=='string'||number.length>100||name.length>200)throw Error('Invalid student details');
-  const studentNumber=number.normalize('NFKC').trim();
-  const normalizedName=name.normalize('NFKC').trim().replace(/\s+/gu,' ');
-  if(!/^\d{1,20}$/.test(studentNumber)||!normalizedName||normalizedName.length>50||
-      !/^[\p{L}\p{M} .'-]+$/u.test(normalizedName))throw Error('Invalid student details');
-  const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([studentNumber,normalizedName])));
-  const id='student:'+Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
-  return {id,studentNumber,name:normalizedName};
-}
 export async function issueStudentSession(env:AuthEnv,user:StudentUser):Promise<string>{
   const expected=await studentFromDetails(user.studentNumber,user.name);
   if(user.id!==expected.id)throw Error('Invalid student identity');

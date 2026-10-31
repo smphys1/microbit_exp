@@ -1,6 +1,16 @@
 # 학번·이름 접속과 공개 배포
 
-학생은 첫 화면에서 학번과 이름을 입력하고 **탐구노트 시작하기**를 누릅니다. 계정 생성, Google/ChatGPT 로그인, 학생 비밀번호는 없습니다. 교사는 접속 화면의 **교사 채점**을 누르고 별도 교사용 코드를 입력합니다.
+학생은 https://smphys1.github.io/microbit_exp/ 에서 학번과 이름을 입력하고 **탐구노트 시작하기**를 누릅니다. 다른 사이트로 이동하지 않으며 계정·비밀번호 없이 작성·PDF·JSON 저장을 이용합니다. Pages에서는 서버 제출과 교사 채점을 제공하지 않습니다.
+
+## GitHub Pages 버전
+
+학생 정보는 현재 탭의 sessionStorage에, 초안은 같은 브라우저의 localStorage에 학생 조합별로 저장합니다. 새로고침해도 접속과 초안을 복원합니다. 탭을 닫거나 나간 뒤에는 같은 학번·이름을 다시 입력하면 해당 브라우저의 초안을 이어갈 수 있습니다. 다른 기기에서는 작성 백업(JSON)을 가져와야 합니다.
+
+CSV·XLSX·그래프 파일은 선택해 보고서에 반영하지만 서버에 전송하지 않습니다. 그래프는 PDF에 포함할 수 있습니다. 새로고침 후에는 파일을 다시 선택하세요. 완성한 PDF와 원본 CSV·XLSX는 교사가 안내한 경로로 제출합니다. 공용 기기에서는 나가기를 누르고 필요하면 사이트 데이터를 정리하세요.
+
+Pages 빌드는 `pnpm build:pages`, 미리보기는 `pnpm preview:pages`입니다. `.dev.vars`나 서버 비밀 키는 필요하지 않습니다. GitHub Actions는 `main` 변경 시 테스트와 정적 빌드를 실행하고 `dist-pages/`를 배포합니다.
+
+아래 내용은 온라인 제출·교사 채점을 사용할 **별도 서버 버전**에 해당합니다.
 
 ## 학생 정보와 제출
 
@@ -44,7 +54,7 @@ pnpm dev
 
 ## Cloudflare 공개 배포
 
-GitHub Pages는 현재 기존 ChatGPT Sites로 이동하는 정적 진입 페이지입니다. **학생 로그인 코드를 제거해도 Sites 자체의 접속 제한은 바뀌지 않습니다.** 계정 없는 학생에게 배포하려면 앱 서버를 공개 Cloudflare Workers로 배포한 다음 Pages의 이동 주소를 바꿉니다. D1과 R2도 필요합니다.
+GitHub Pages만으로는 온라인 제출·교사 채점을 실행할 수 없습니다. 해당 기능을 사용하려면 별도 공개 Cloudflare Workers 주소에 서버 버전을 배포하고 D1과 R2를 연결합니다. Pages는 작성·파일 저장용 앱으로 독립적으로 사용할 수 있습니다.
 
 Cloudflare 인증이 가능한 개발 컴퓨터에서 계정의 Workers 하위 도메인을 확인하고 다음 작업을 진행합니다.
 
@@ -76,4 +86,4 @@ pnpm exec wrangler secret put TEACHER_KEY --config dist/server/wrangler.producti
 
 `secret put`은 비밀 값을 대화형 입력합니다. 값은 저장소·채팅·명령 인자에 기록하지 않습니다. Cloudflare 대시보드의 Worker → Settings → Variables and Secrets에서도 Secret으로 설정할 수 있습니다. 새 D1/R2를 만들면 기존 Sites의 데이터와 첨부 파일은 자동 복사되지 않습니다.
 
-공개 주소에서 학번·이름 접속, 같은 정보로 재접속, 다른 학생 조합의 기록 분리, 첨부 파일 제출·다운로드, 교사 채점과 나가기를 확인합니다. 이후 `github-pages/index.html`의 meta refresh, canonical, JavaScript 이동과 대체 링크 네 곳을 새 주소로 바꾸고 GitHub Pages를 다시 배포합니다.
+공개 주소에서 학번·이름 접속, 같은 정보로 재접속, 다른 학생 조합의 기록 분리, 첨부 파일 제출·다운로드, 교사 채점과 나가기를 확인합니다. 서버 기능은 별도 배포한 주소에서 사용합니다. GitHub Pages 앱은 해당 서버에 자동 연결하거나 이동하지 않습니다.

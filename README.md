@@ -2,44 +2,58 @@
 
 고등학교 **과학탐구실험 개인 자유주제탐구**를 위한 **탐구노트 ver2** 소스입니다. 마이크로비트 측정부터 파일 제출, 보고서 PDF, 교사의 50점 평가까지 지원합니다.
 
-- [ver2 웹앱](https://microbit-inquiry-lab-v2-dh.workspace-489790.chatgpt.site)
+- [ver2 웹앱 · GitHub Pages](https://smphys1.github.io/microbit_exp/)
 - [기존 ver1](https://microbit-inquiry-lab-dh.workspace-489790.chatgpt.site) — 별도로 유지됩니다.
 
-사이트 접속 가능 범위는 Sites의 공유 설정에 따릅니다. 이 저장소에는 학생 제출물, 채점 데이터, 교사용 접속 코드가 포함되어 있지 않습니다.
+GitHub Pages 버전은 계정 없이 공개 주소에서 바로 실행됩니다. 기존 Sites 주소의 접속 범위는 Sites 공유 설정에 따릅니다. 이 저장소에는 학생 제출물, 채점 데이터, 교사용 접속 코드가 포함되어 있지 않습니다.
 
-학생은 첫 화면에 **학번과 이름만 입력**하면 이용할 수 있습니다. Google·ChatGPT 계정이나 학생 비밀번호는 필요하지 않습니다. 같은 학번과 이름으로 다시 접속하면 이전 제출을 불러올 수 있습니다. **본인 확인은 하지 않으므로 같은 정보를 입력한 사람은 제출물을 조회·재제출하고 공개된 평가를 볼 수 있습니다.** 공개 서버 배포 방법은 [학번·이름 접속과 배포](docs/student-access.md)를 참고하세요. 기존 Sites 배포는 코드 변경만으로 갱신되지 않습니다.
+학생은 첫 화면에 **학번과 이름만 입력**하면 이용할 수 있습니다. Google·ChatGPT 계정이나 학생 비밀번호는 필요하지 않습니다. GitHub Pages에서는 학생별 브라우저 초안, 보고서 PDF·JSON 저장을 제공합니다. 온라인 제출·교사 채점은 별도 서버 버전에서 제공합니다. 자세한 구분과 배포 방법은 [학번·이름 접속과 배포](docs/student-access.md)를 참고하세요.
 
-## GitHub Pages에서 ver2 열기
+## GitHub Pages에서 ver2 실행하기
 
-GitHub 저장소의 **Code 화면**에는 README가 표시됩니다. 웹앱 진입 화면은 별도의 **GitHub Pages 주소**에서 열립니다.
-
-`github-pages/index.html`은 배포된 ver2 웹앱으로 자동 이동하는 진입점입니다. 자동 이동이 차단되면 화면의 **웹앱 열기** 링크를 누르세요. 현재 이동 대상은 기존 Sites 주소이므로, 계정 없이 배포하려면 공개 서버를 배포하고 해당 주소로 이동 대상을 변경해야 합니다. 학생 접속과 제출·채점은 앱 서버에서 처리합니다.
+**https://smphys1.github.io/microbit_exp/** 에서 앱이 직접 실행됩니다. 다른 사이트로 자동 이동하지 않습니다. GitHub 저장소의 Code 화면에 표시되는 README와는 별개입니다.
 
 ```text
-github-pages/index.html       GitHub Pages 진입점 → 배포된 ver2로 이동
-.github/workflows/pages.yml    github-pages/index.html을 Pages 루트에 배포
-app/                          React 화면 및 서버 API
-worker/                       Cloudflare Workers 진입점
-db/, drizzle/                 D1 스키마와 마이그레이션
+github-pages/index.html        정적 앱 HTML 진입점
+github-pages/main.tsx          React 앱 실행
+vite.pages.config.ts           Pages 빌드: 하위 경로에서도 동작하는 상대 자산 URL
+.github/workflows/pages.yml    빌드·검증 후 dist-pages를 Pages에 배포
+app/                           두 버전이 공유하는 화면과 서버 API
+worker/, db/, drizzle/         서버 버전의 Workers·D1·R2
 ```
+
+| 기능 | GitHub Pages 버전 | 서버 버전 |
+| --- | --- | --- |
+| 학번·이름 입력, 탐구 작성, 센서 안내 | 지원 | 지원 |
+| 파일 선택, 그래프 미리보기, PDF·JSON 저장 | 지원 | 지원 |
+| 같은 브라우저의 학생별 초안 복원 | 지원 | 지원 |
+| 온라인 제출, 서버 파일 보관, 교사 채점 | 미지원 | 지원 |
+
+Pages에서는 PDF·원본 CSV·XLSX를 교사가 안내한 제출 경로로 전달합니다. 파일 선택만으로 전송되지 않습니다. 기기를 바꿀 때는 JSON 백업을 내려받아 옮기며, 새로고침 후 첨부 파일은 다시 선택합니다. 서버 API를 호출하거나 제출 완료로 표시하지 않습니다.
 
 배포 방법:
 
-1. 변경 파일을 GitHub의 `main` 브랜치에 커밋하고 푸시합니다.
-2. 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 선택합니다.
-3. **Actions → Deploy ver2 entry to GitHub Pages → Run workflow**를 실행합니다. 이후 `github-pages/index.html` 또는 배포 워크플로 변경을 `main`에 푸시하면 자동 배포됩니다.
-4. 배포가 성공하면 `https://smphys1.github.io/microbit_exp/`를 엽니다. 이 주소에서 ver2 웹앱으로 이동합니다.
+1. 저장소 **Settings → Pages → Source**를 **GitHub Actions**로 설정합니다.
+2. `main`에 푸시하면 **Deploy ver2 app to GitHub Pages**가 의존성 설치·타입 검사·테스트·정적 빌드를 실행하고 배포합니다.
+3. 수동 실행은 **Actions → Deploy ver2 app to GitHub Pages → Run workflow → main**에서 할 수 있습니다.
+4. 배포 성공 후 위 Pages 주소를 엽니다. 기존 이동 화면이 보이면 새로고침하거나 시크릿 창에서 확인하세요.
 
-Pages 배포물에는 루트의 `index.html`과 `.nojekyll`만 포함됩니다. README, 앱 소스, 로컬 환경 변수, 데이터베이스와 업로드 파일은 포함하지 않습니다. 이 Pages 배포에는 Node.js 의존성 설치나 Cloudflare 인증이 필요하지 않습니다.
+로컬 정적 빌드와 미리보기:
 
-`github-pages/index.html`은 ver2 앱을 정적 HTML로 변환한 파일이 아닙니다. 앱 화면 자체를 GitHub Pages에서 실행하려면 별도 프런트엔드 빌드와 서버 인증·API 연결 설계가 필요합니다. ver2 주소가 변경되면 `github-pages/index.html`의 자동 이동 주소와 링크를 함께 수정하세요.
+```sh
+pnpm install --frozen-lockfile
+pnpm build:pages
+pnpm preview:pages
+```
+
+생성된 `dist-pages/`만 배포합니다. 서버 코드·로컬 환경 변수·데이터베이스·업로드 파일은 배포물에 포함하지 않습니다. Pages 실행에는 `APP_URL`, 서버 비밀 키나 Cloudflare 계정이 필요하지 않습니다. `.dev.vars`는 서버 버전에만 사용합니다.
 
 ## 학생 활동
 
 1. **주제 설정**: 센서, 측정 상황, 데이터 종류, 궁금한 점을 입력하면 한 문장 주제 초안을 제시합니다. 초안을 적용하고 수정할 수 있습니다.
 2. **센서·변인 점검**: 센서별 MakeCode 코드, 조작·종속·통제 변인, 측정 간격·시간·반복을 확인합니다. 내장 빛·온도·소리(V2)·가속도·자기장 센서를 안내하며, 외부 센서는 모델별 배선·확장 기능 확인이 필요합니다.
 3. **파일 첨부**: 원본 CSV와 그래프가 포함된 구글시트 XLSX를 첨부합니다. CSV는 최대 8개, 파일당 10 MB, 유지할 파일과 새 첨부를 합쳐 전체 20 MB까지 제출할 수 있습니다. 보고서용 그래프 PNG/JPG는 선택 사항입니다.
-4. **보고서·최종 제출**: 동기·예상, 결과 분석, 결론, 한계·개선·출처의 네 칸을 작성합니다. 앞 단계의 주제와 실험 방법은 자동 반영됩니다. PDF를 다운로드하고, 최종 제출 버튼으로 작성 내용과 첨부 파일을 서버에 저장합니다.
+4. **보고서·파일 저장 / 서버 제출**: 동기·예상, 결과 분석, 결론, 한계·개선·출처의 네 칸을 작성합니다. 앞 단계의 주제와 실험 방법은 자동 반영됩니다. PDF와 JSON 백업을 다운로드합니다. 서버 버전에서는 최종 제출 버튼으로 작성 내용과 첨부 파일을 서버에 저장합니다.
 
 구글시트 안내에는 A1의 `sep=` 내용 삭제(해당 값이 있을 때), A2·B2 머리글 입력, A2부터 데이터 영역 선택, 삽입 → 차트, 차트 유형·X축·계열·제목·축 제목 수정과 XLSX 내보내기가 포함됩니다. 실제 CSV 열 구조와 시간 단위를 먼저 확인해야 합니다.
 
@@ -64,9 +78,9 @@ Pages 배포물에는 루트의 `index.html`과 `.nojekyll`만 포함됩니다. 
 - jsPDF / html2canvas: 한글 보고서 PDF 생성
 - 학번·이름 입력과 서명된 접속 세션: 학생별 제출 구분
 
-**서버와 저장소가 필요한 웹앱입니다. GitHub Pages 같은 정적 호스팅만으로는 제출·채점 API를 실행할 수 없습니다.** GitHub 커밋과 웹사이트 배포는 별도 작업입니다.
+작성·PDF 저장은 GitHub Pages에서 실행됩니다. 온라인 제출·채점 API는 Workers·D1·R2가 있는 서버 버전에서만 실행됩니다. GitHub 커밋과 웹사이트 배포 성공은 별도로 확인해야 합니다.
 
-## 개발 환경
+## 서버 버전 개발 환경
 
 Node.js 22.13 이상(권장 24)과 `package.json`의 `packageManager`에 지정된 pnpm을 사용합니다.
 
@@ -110,6 +124,7 @@ Sites 관리 환경에서는 해당 환경의 미리보기·배포 도구를 사
 ```sh
 pnpm exec tsc --noEmit
 pnpm test
+pnpm build:pages
 pnpm build
 ```
 

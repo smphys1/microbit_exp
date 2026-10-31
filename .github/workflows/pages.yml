@@ -1,11 +1,8 @@
-name: Deploy ver2 entry to GitHub Pages
+name: Deploy ver2 app to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths:
-      - github-pages/**
-      - .github/workflows/pages.yml
   workflow_dispatch:
 
 permissions:
@@ -20,14 +17,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare static entry
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check and test
         run: |
-          mkdir -p "$RUNNER_TEMP/pages"
-          cp github-pages/index.html "$RUNNER_TEMP/pages/index.html"
-          touch "$RUNNER_TEMP/pages/.nojekyll"
+          pnpm exec tsc --noEmit
+          pnpm test
+      - name: Build web app
+        run: |
+          pnpm build:pages
+          touch dist-pages/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ${{ runner.temp }}/pages
+          path: dist-pages
 
   deploy:
     needs: build
