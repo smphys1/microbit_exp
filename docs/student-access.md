@@ -8,7 +8,7 @@
 
 CSV·XLSX·그래프 파일은 선택해 보고서에 반영하지만 서버에 전송하지 않습니다. 그래프는 PDF에 포함할 수 있습니다. 새로고침 후에는 파일을 다시 선택하세요. 완성한 PDF와 원본 CSV·XLSX는 교사가 안내한 경로로 제출합니다. 공용 기기에서는 나가기를 누르고 필요하면 사이트 데이터를 정리하세요.
 
-Pages 빌드는 `pnpm build:pages`, 미리보기는 `pnpm preview:pages`입니다. `.dev.vars`나 서버 비밀 키는 필요하지 않습니다. GitHub Actions는 `main` 변경 시 테스트와 정적 빌드를 실행하고 `dist-pages/`를 배포합니다.
+개발 미리보기는 `pnpm dev`(5173번 포트), 완성 빌드는 `pnpm build:pages`, 빌드 미리보기는 `pnpm preview:pages`(4173번 포트)입니다. 첫 주소에서 앱이 바로 열립니다. `.dev.vars`나 서버 비밀 키는 필요하지 않습니다. GitHub Actions는 `main` 변경 시 테스트와 정적 빌드를 실행하고 `dist-pages/`를 배포합니다.
 
 아래 내용은 온라인 제출·교사 채점을 사용할 **별도 서버 버전**에 해당합니다.
 
@@ -47,7 +47,7 @@ pnpm build
 
 ```sh
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_mighty_mac_gargan.sql
-pnpm dev
+pnpm dev:server
 ```
 
 `.dev.vars`를 바꾼 뒤 개발 서버를 재시작합니다. 앱 주소와 `APP_URL`의 origin이 같아야 접속됩니다.

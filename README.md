@@ -38,13 +38,17 @@ Pages에서는 PDF·원본 CSV·XLSX를 교사가 안내한 제출 경로로 전
 3. 수동 실행은 **Actions → Deploy ver2 app to GitHub Pages → Run workflow → main**에서 할 수 있습니다.
 4. 배포 성공 후 위 Pages 주소를 엽니다. 기존 이동 화면이 보이면 새로고침하거나 시크릿 창에서 확인하세요.
 
-로컬 정적 빌드와 미리보기:
+개발 중에는 `pnpm dev`로 GitHub Pages와 같은 앱을 바로 엽니다. 외부 미리보기 연결을 위해 모든 인터페이스에서 5173번 포트를 사용하며 `terminal.local` 호스트를 허용합니다. 서버 세션이나 `.dev.vars`는 필요하지 않습니다.
+
+완성 빌드의 미리보기:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm build:pages
 pnpm preview:pages
 ```
+
+미리보기 첫 주소에서 앱이 바로 열립니다(4173번 포트). 배포와 같은 하위 경로를 확인할 때는 `pnpm preview:pages --base /microbit_exp/`로 실행합니다.
 
 생성된 `dist-pages/`만 배포합니다. 서버 코드·로컬 환경 변수·데이터베이스·업로드 파일은 배포물에 포함하지 않습니다. Pages 실행에는 `APP_URL`, 서버 비밀 키나 Cloudflare 계정이 필요하지 않습니다. `.dev.vars`는 서버 버전에만 사용합니다.
 
@@ -94,7 +98,7 @@ cp .dev.vars.example .dev.vars
 ```sh
 pnpm build
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_mighty_mac_gargan.sql
-pnpm dev
+pnpm dev:server
 ```
 
 위 SQL은 새 로컬 데이터베이스에 한 번만 적용합니다. 이후 스키마 변경은 다음 명령으로 추가 마이그레이션을 생성하고 순서대로 적용합니다.
