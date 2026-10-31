@@ -7,6 +7,31 @@
 
 사이트 접속 가능 범위는 Sites의 공유 설정에 따릅니다. 이 저장소에는 학생 제출물, 채점 데이터, 교사용 접속 코드가 포함되어 있지 않습니다.
 
+## GitHub Pages에서 ver2 열기
+
+GitHub 저장소의 **Code 화면**에는 README가 표시됩니다. 웹앱 진입 화면은 별도의 **GitHub Pages 주소**에서 열립니다.
+
+루트의 `index.html`은 배포된 ver2 웹앱으로 자동 이동하는 진입점입니다. 자동 이동이 차단되면 화면의 **웹앱 열기** 링크를 누르세요. 로그인과 제출·채점은 기존 ver2 서버에서 처리합니다.
+
+```text
+index.html                    GitHub Pages 진입점 → 배포된 ver2로 이동
+.github/workflows/pages.yml    index.html만 Pages에 배포
+app/                          React 화면 및 서버 API
+worker/                       Cloudflare Workers 진입점
+db/, drizzle/                 D1 스키마와 마이그레이션
+```
+
+배포 방법:
+
+1. 변경 파일을 GitHub의 `main` 브랜치에 커밋하고 푸시합니다.
+2. 저장소 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 선택합니다.
+3. **Actions → Deploy ver2 entry to GitHub Pages → Run workflow**를 실행합니다. 이후 `index.html` 또는 배포 워크플로 변경을 `main`에 푸시하면 자동 배포됩니다.
+4. 배포가 성공하면 `https://smphys1.github.io/microbit_exp/`를 엽니다. 이 주소에서 ver2 웹앱으로 이동합니다.
+
+Pages 배포물에는 `index.html`과 `.nojekyll`만 포함됩니다. README, 앱 소스, 로컬 환경 변수, 데이터베이스와 업로드 파일은 포함하지 않습니다. 이 Pages 배포에는 Node.js 의존성 설치나 Cloudflare 인증이 필요하지 않습니다.
+
+`index.html`은 ver2 앱을 정적 HTML로 변환한 파일이 아닙니다. 앱 화면 자체를 GitHub Pages에서 실행하려면 별도 프런트엔드 빌드와 서버 인증·API 연결 설계가 필요합니다. ver2 주소가 변경되면 `index.html`의 자동 이동 주소와 링크를 함께 수정하세요.
+
 ## 학생 활동
 
 1. **주제 설정**: 센서, 측정 상황, 데이터 종류, 궁금한 점을 입력하면 한 문장 주제 초안을 제시합니다. 초안을 적용하고 수정할 수 있습니다.
